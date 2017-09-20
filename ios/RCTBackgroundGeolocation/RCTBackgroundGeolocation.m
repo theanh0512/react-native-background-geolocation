@@ -100,7 +100,7 @@ RCT_EXPORT_METHOD(stop:(RCTResponseSenderBlock)success failure:(RCTResponseSende
     }
 }
 
-RCT_EXPORT_METHOD(switchMode:(NSNumber*)mode success:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
+RCT_EXPORT_METHOD(switchMode:(nonnull NSNumber*)mode success:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
 {
     RCTLogInfo(@"RCTBackgroundGeolocation #getLogEntries");
     [locationManager switchMode:[mode integerValue]];
