@@ -53,6 +53,7 @@ public class DistanceFilterLocationProvider extends AbstractLocationProvider imp
     private static final Integer MAX_STATIONARY_ACQUISITION_ATTEMPTS = 5;
     private static final Integer MAX_SPEED_ACQUISITION_ATTEMPTS = 3;
 
+    private Boolean hasDelivered = false;
     private Boolean isMoving = false;
     private Boolean isAcquiringStationaryLocation = false;
     private Boolean isAcquiringSpeed = false;
@@ -249,6 +250,13 @@ public class DistanceFilterLocationProvider extends AbstractLocationProvider imp
 
     public void onLocationChanged(Location location) {
         log.debug("Location change: {} isMoving={}", location.toString(), isMoving);
+
+        // we never delivered a location, allow quick init
+        if (lastLocation == null && !hasDelivered) {
+            log.debug("Sending initial location...");
+            hasDelivered = true;
+            handleLocation(location);
+        }
 
         if (!isMoving && !isAcquiringStationaryLocation && stationaryLocation==null) {
             // Perhaps our GPS signal was interupted, re-acquire a stationaryLocation now.
