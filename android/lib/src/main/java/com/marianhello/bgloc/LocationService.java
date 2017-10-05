@@ -34,6 +34,9 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.bridge.ReactContext;
 import com.marianhello.bgloc.data.BackgroundLocation;
 import com.marianhello.bgloc.data.ConfigurationDAO;
 import com.marianhello.bgloc.data.DAOFactory;
@@ -364,6 +367,45 @@ public class LocationService extends Service {
     }
 
     public void sendClientMessage(Message msg) {
+        //getApplicationContext().sendOrderedBroadcast();
+        //ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
+
+        Intent i = new Intent("com.marianhello.bgloc.LocationNotification");
+        i.putExtra("what", msg.what);
+        i.putExtra("data", msg.getData());
+        final Intent message = i;
+
+        // We need to run this on the main thread, as the React code assumes that is true.
+        // Namely, DevServerHelper constructs a Handler() without a Looper, which triggers:
+        // "Can't create handler inside thread that has not called Looper.prepare()"
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            public void run() {
+                // Construct and load our normal React JS code bundle
+                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
+                ReactContext context = mReactInstanceManager.getCurrentReactContext();
+                // If it's constructed, send a notification
+                if (context != null) {
+                    log.debug("React instance available, sending intent");
+                    context.sendOrderedBroadcast(message, null);
+                } else {
+                    log.debug("React instance unavailable, creating...");
+
+                    // Otherwise wait for construction, then send the notification
+                    mReactInstanceManager.addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
+                        public void onReactContextInitialized(ReactContext context) {
+                            log.debug("React instance created, sending intent...");
+                            context.sendOrderedBroadcast(message, null);
+                        }
+                    });
+                    if (!mReactInstanceManager.hasStartedCreatingInitialContext()) {
+                        // Construct it in the background
+                        mReactInstanceManager.createReactContextInBackground();
+                    }
+                }
+            }
+        });
+
         Iterator<Messenger> it = mClients.values().iterator();
         while (it.hasNext()) {
             try {

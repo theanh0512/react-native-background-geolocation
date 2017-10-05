@@ -2,9 +2,12 @@ package com.marianhello.react;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Notification;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -46,6 +49,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -78,6 +82,8 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
         LoggerManager.enableDBLogging();
         log = LoggerManager.getLogger(BackgroundGeolocationModule.class);
         log.info("initializing plugin");
+
+        registerMessageHandler();
     }
 
     @Override
@@ -108,76 +114,89 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
         }
     }
 
+    private void registerMessageHandler() {
+        IntentFilter intentFilter = new IntentFilter("com.marianhello.bgloc.LocationNotification");
+        getReactApplicationContext().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (getReactApplicationContext().hasActiveCatalystInstance()) {
+                    int what = intent.getIntExtra("what", -1);
+                    switch (what) {
+                        case LocationService.MSG_LOCATION_UPDATE:
+                            try {
+                                log.debug("Sending location to webview");
+                                Bundle bundle = intent.getBundleExtra("data");
+                                bundle.setClassLoader(LocationService.class.getClassLoader());
+                                BackgroundLocation location = (BackgroundLocation) bundle.getParcelable("location");
+                                Integer locationProvider = location.getLocationProvider();
+
+                                WritableMap out = Arguments.createMap();
+                                if (locationProvider != null)
+                                    out.putInt("locationProvider", locationProvider);
+                                out.putDouble("time", new Long(location.getTime()).doubleValue());
+                                out.putDouble("latitude", location.getLatitude());
+                                out.putDouble("longitude", location.getLongitude());
+                                out.putDouble("accuracy", location.getAccuracy());
+                                out.putDouble("speed", location.getSpeed());
+                                out.putDouble("altitude", location.getAltitude());
+                                out.putDouble("bearing", location.getBearing());
+
+                                sendEvent(getReactApplicationContext(), LOCATION_EVENT, out);
+                            } catch (Exception e) {
+                                log.warn("Error converting message to json");
+
+                                WritableMap out = Arguments.createMap();
+                                out.putString("message", "Error converting message to json");
+                                out.putString("detail", e.getMessage());
+
+                                sendEvent(getReactApplicationContext(), ERROR_EVENT, out);
+                            }
+
+                            break;
+                        case LocationService.MSG_ON_STATIONARY:
+                            try {
+                                log.debug("Sending stationary location to webview");
+                                Bundle bundle = intent.getBundleExtra("data");
+                                bundle.setClassLoader(LocationService.class.getClassLoader());
+                                BackgroundLocation location = (BackgroundLocation) bundle.getParcelable("location");
+                                Integer locationProvider = location.getLocationProvider();
+
+                                WritableMap out = Arguments.createMap();
+                                if (locationProvider != null)
+                                    out.putInt("locationProvider", locationProvider);
+                                out.putDouble("time", new Long(location.getTime()).doubleValue());
+                                out.putDouble("latitude", location.getLatitude());
+                                out.putDouble("longitude", location.getLongitude());
+                                out.putDouble("accuracy", location.getAccuracy());
+                                out.putDouble("speed", location.getSpeed());
+                                out.putDouble("altitude", location.getAltitude());
+                                out.putDouble("bearing", location.getBearing());
+
+                                sendEvent(getReactApplicationContext(), STATIONARY_EVENT, out);
+                            } catch (Exception e) {
+                                log.warn("Error converting message to json");
+
+                                WritableMap out = Arguments.createMap();
+                                out.putString("message", "Error converting message to json");
+                                out.putString("detail", e.getMessage());
+
+                                sendEvent(getReactApplicationContext(), ERROR_EVENT, out);
+                            }
+
+                            break;
+                    }
+                }
+            }
+        }, intentFilter);
+    }
+
     /**
      * Handler of incoming messages from service.
      */
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case LocationService.MSG_LOCATION_UPDATE:
-                    try {
-                        log.debug("Sending location to webview");
-                        Bundle bundle = msg.getData();
-                        bundle.setClassLoader(LocationService.class.getClassLoader());
-                        BackgroundLocation location = (BackgroundLocation) bundle.getParcelable("location");
-                        Integer locationProvider = location.getLocationProvider();
-
-                        WritableMap out = Arguments.createMap();
-                        if (locationProvider != null) out.putInt("locationProvider", locationProvider);
-                        out.putDouble("time", new Long(location.getTime()).doubleValue());
-                        out.putDouble("latitude", location.getLatitude());
-                        out.putDouble("longitude", location.getLongitude());
-                        out.putDouble("accuracy", location.getAccuracy());
-                        out.putDouble("speed", location.getSpeed());
-                        out.putDouble("altitude", location.getAltitude());
-                        out.putDouble("bearing", location.getBearing());
-
-                        sendEvent(getReactApplicationContext(), LOCATION_EVENT, out);
-                    } catch (Exception e) {
-                        log.warn("Error converting message to json");
-
-                        WritableMap out = Arguments.createMap();
-                        out.putString("message", "Error converting message to json");
-                        out.putString("detail", e.getMessage());
-
-                        sendEvent(getReactApplicationContext(), ERROR_EVENT, out);
-                    }
-
-                    break;
-                case LocationService.MSG_ON_STATIONARY:
-                    try {
-                        log.debug("Sending stationary location to webview");
-                        Bundle bundle = msg.getData();
-                        bundle.setClassLoader(LocationService.class.getClassLoader());
-                        BackgroundLocation location = (BackgroundLocation) bundle.getParcelable("location");
-                        Integer locationProvider = location.getLocationProvider();
-
-                        WritableMap out = Arguments.createMap();
-                        if (locationProvider != null) out.putInt("locationProvider", locationProvider);
-                        out.putDouble("time", new Long(location.getTime()).doubleValue());
-                        out.putDouble("latitude", location.getLatitude());
-                        out.putDouble("longitude", location.getLongitude());
-                        out.putDouble("accuracy", location.getAccuracy());
-                        out.putDouble("speed", location.getSpeed());
-                        out.putDouble("altitude", location.getAltitude());
-                        out.putDouble("bearing", location.getBearing());
-
-                        sendEvent(getReactApplicationContext(), STATIONARY_EVENT, out);
-                    } catch (Exception e) {
-                        log.warn("Error converting message to json");
-
-                        WritableMap out = Arguments.createMap();
-                        out.putString("message", "Error converting message to json");
-                        out.putString("detail", e.getMessage());
-
-                        sendEvent(getReactApplicationContext(), ERROR_EVENT, out);
-                    }
-
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
+            super.handleMessage(msg);
         }
     }
 
