@@ -37,7 +37,7 @@ RCT_EXPORT_MODULE();
     if (self) {
         [DDLog addLogger:[DDASLLogger sharedInstance] withLevel:DDLogLevelInfo];
         [DDLog addLogger:[DDTTYLogger sharedInstance] withLevel:DDLogLevelDebug];
-        
+
         sqliteLogger = [[FMDBLogger alloc] initWithLogDirectory:[self loggerDirectory]];
         sqliteLogger.saveThreshold     = 1;
         sqliteLogger.saveInterval      = 0;
@@ -118,13 +118,13 @@ RCT_EXPORT_METHOD(isLocationEnabled:(RCTResponseSenderBlock)success failure:(RCT
     success(@[@([locationManager isLocationEnabled])]);
 }
 
-RCT_EXPORT_METHOD(showAppSettings)
+RCT_EXPORT_METHOD(showAppSettings:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
 {
     RCTLogInfo(@"RCTBackgroundGeolocation #showAppSettings");
     [locationManager showAppSettings];
 }
 
-RCT_EXPORT_METHOD(showLocationSettings)
+RCT_EXPORT_METHOD(showLocationSettings:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
 {
     RCTLogInfo(@"RCTBackgroundGeolocation #showLocationSettings");
     [locationManager showLocationSettings];
@@ -212,7 +212,7 @@ RCT_EXPORT_METHOD(getConfig:(RCTResponseSenderBlock)success failure:(RCTResponse
 {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : NSTemporaryDirectory();
-    
+
     return [basePath stringByAppendingPathComponent:@"SQLiteLogger"];
 }
 

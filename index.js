@@ -53,12 +53,16 @@ var BackgroundGeolocation = {
     RNBackgroundGeolocation.isLocationEnabled(successFn, errorFn);
   },
 
-  showAppSettings: function() {
-    RNBackgroundGeolocation.showAppSettings();
+  showAppSettings: function(successFn, errorFn) {
+    successFn = successFn || emptyFn;
+    errorFn = errorFn || emptyFn;
+    RNBackgroundGeolocation.showAppSettings(successFn, errorFn);
   },
 
-  showLocationSettings: function() {
-    RNBackgroundGeolocation.showLocationSettings();
+  showLocationSettings: function(successFn, errorFn) {
+    successFn = successFn || emptyFn;
+    errorFn = errorFn || emptyFn;
+    RNBackgroundGeolocation.showLocationSettings(successFn, errorFn);
   },
 
   getLocations: function(successFn, errorFn) {
