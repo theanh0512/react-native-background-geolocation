@@ -313,7 +313,7 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
     public void isLocationEnabled(Callback success, Callback error) {
         log.debug("Location services enabled check");
         try {
-            int isLocationEnabled = isLocationEnabled(getContext()) ? 1 : 0;
+            int isLocationEnabled = isLocationEnabled(getReactApplicationContext()) ? 1 : 0;
             success.invoke(isLocationEnabled);
         } catch (SettingNotFoundException e) {
             log.error("Location service checked failed: {}", e.getMessage());
@@ -396,6 +396,7 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
             json.putInt("distanceFilter", config.getDistanceFilter());
             json.putInt("desiredAccuracy", config.getDesiredAccuracy());
             json.putBoolean("debug", config.isDebugging());
+            json.putInt("maxLocations", config.getMaxLocations());
             json.putString("notificationTitle", config.getNotificationTitle());
             json.putString("notificationText", config.getNotificationText());
             json.putString("notificationIconLarge", config.getLargeNotificationIcon());
@@ -541,7 +542,7 @@ public class BackgroundGeolocationModule extends ReactContextBaseJavaModule impl
     }
 
     public void persistConfiguration(Config config) throws NullPointerException {
-        ConfigurationDAO dao = DAOFactory.createConfigurationDAO(getContext());
+        ConfigurationDAO dao = DAOFactory.createConfigurationDAO(getReactApplicationContext());
         dao.persistConfiguration(config);
     }
 
