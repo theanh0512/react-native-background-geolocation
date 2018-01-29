@@ -1,5 +1,12 @@
 ## Changelog
 
+### [0.4.1] - 2017-12-19
+#### Changed
+- react native peer dependency >0.49.0
+
+### [0.4.0] - 2017-12-13
+release
+
 ### [0.4.0-rc.3] - 2017-11-23
 ### Added
 - iOS send http headers on background sync
