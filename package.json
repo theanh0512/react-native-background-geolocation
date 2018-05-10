@@ -1,6 +1,6 @@
 {
   "name": "react-native-mauron85-background-geolocation",
-  "version": "0.4.1-local",
+  "version": "0.4.2-local",
   "description": "optimized background location tracking",
   "main": "index.js",
   "scripts": {
