@@ -706,6 +706,47 @@ was killed by the system and all registered event listeners will not be triggere
 
 **Note:** Prefer configuration options `url` and `syncUrl` over headless task. Use it sparingly!
 
+### React Android Headless location service (Experimental)
+
+In your projects android manifest add following:
+
+```xml
+...
+
+<service android:name="com.marianhello.bgloc.react.service.LocationHeadlessService" />
+ 
+ ...
+ </application>
+</manifest>
+
+```
+
+Create a js file (e.g. headlessLocationService.js ) in your project with following:
+```javascript
+
+type Location = {
+  latitude: number,
+  longitude: number,
+  time: number,
+};
+
+export default async (location: Location) => {
+  console.log(location);
+  return Promise.resolve();
+};
+
+```
+
+In index.js of your project register the headless task:
+
+```javascript
+import headlessLocationService from './src/services/headlessLocationService';
+
+AppRegistry.registerHeadlessTask('RNLocationHeadlessService', () => headlessLocationService);
+```
+
+
+
 #### Task event
 | Parameter          | Type      | Description                                                            |
 |--------------------|-----------|------------------------------------------------------------------------|
