@@ -5,16 +5,15 @@ npm-debug.log
 # Xcode
 xcuserdata
 project.xcworkspace
-ios/react-native
 
 # Android/IJ
 .idea
 .gradle
-.project
-.classpath
-.gradle
-.settings
 local.properties
 *.iml
 build
 *.skip
+
+# CircleCI
+.circleci
+ci/
