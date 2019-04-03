@@ -10,6 +10,7 @@ This is a new class
 package com.marianhello.bgloc.service;
 
 import android.accounts.Account;
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -31,6 +32,7 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import com.facebook.react.HeadlessJsTaskService;
 
 import com.marianhello.bgloc.Config;
 import com.marianhello.bgloc.ConnectivityListener;
@@ -45,6 +47,7 @@ import com.marianhello.bgloc.data.DAOFactory;
 import com.marianhello.bgloc.data.LocationDAO;
 import com.marianhello.bgloc.headless.ActivityTask;
 import com.marianhello.bgloc.headless.HeadlessTaskRunner;
+import com.marianhello.bgloc.headless.LocationHeadlessService;
 import com.marianhello.bgloc.headless.LocationTask;
 import com.marianhello.bgloc.headless.StationaryTask;
 import com.marianhello.bgloc.headless.Task;
@@ -58,6 +61,8 @@ import com.marianhello.logging.UncaughtExceptionLogger;
 
 import org.chromium.content.browser.ThreadUtils;
 import org.json.JSONException;
+
+import java.util.List;
 
 import static com.marianhello.bgloc.service.LocationServiceIntentBuilder.containsCommand;
 import static com.marianhello.bgloc.service.LocationServiceIntentBuilder.containsMessage;
@@ -289,6 +294,11 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
             processMessage(getMessage(intent));
         }
 
+        if(Intent.FLAG_FROM_BACKGROUND==intent.getFlags()){
+            start();
+            startForeground();
+        }
+
         return START_STICKY;
     }
 
@@ -297,6 +307,9 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
     }
 
     private void processCommand(int command, Object arg) {
+
+        logger.debug("Will start service with: {}", command);
+
         try {
             switch (command) {
                 case CommandId.START:
@@ -528,7 +541,52 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
             }
         });
 
+        runReactHeadlessService(location);
+
+
+
         postLocation(location);
+    }
+
+    private void runReactHeadlessService(BackgroundLocation location) {
+
+        if(isAppOnForeground(this)){
+            return;
+        }
+
+        logger.debug("runReactHeadlessService {}", location.toString());
+
+        Bundle locationBundle = new Bundle();
+        locationBundle.putDouble("latitude", location.getLatitude());
+        locationBundle.putDouble("longitude", location.getLongitude());
+        locationBundle.putLong("time", location.getTime());
+        locationBundle.putFloat("accuracy",location.getAccuracy());
+
+        Intent serviceIntent = new Intent(this, LocationHeadlessService.class);
+        serviceIntent.putExtras(locationBundle);
+
+        this.startService(serviceIntent);
+        HeadlessJsTaskService.acquireWakeLockNow(this);
+    }
+
+    private boolean isAppOnForeground(Context context) {
+        /**
+         * We need to check if app is in foreground otherwise the app will crash.
+         * http://stackoverflow.com/questions/8489993/check-android-application-is-in-foreground-or-not
+         **/
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+        final String packageName = context.getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    && appProcess.processName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

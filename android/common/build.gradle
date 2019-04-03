@@ -15,6 +15,7 @@ def oreoDependencies = [
     [configuration: "testImplementation", dependency: testLibs.robolectric],
     [configuration: "testImplementation", dependency: testLibs.mockitoCore],
     [configuration: "implementation", dependency: androidLibs.playServicesLocation],
+    [configuration: "implementation", dependency: libs.reactNative],
     [configuration: "implementation", dependency: androidLibs.supportCompat],
     [configuration: "implementation", dependency: androidLibs.appcompat],
     [configuration: "implementation", dependency: libs.permissions,
@@ -35,6 +36,8 @@ def preoreoDependencies = [
     [configuration: "compile", dependency: androidLibs.playServicesLocation],
     [configuration: "oreoCompile", dependency: androidLibs.supportCompat],
     [configuration: "compile", dependency: androidLibs.appcompat],
+    [configuration: "compile", dependency: libs.reactNative],
+
     [configuration: "compile", dependency: libs.permissions,
         options: { exclude group: 'com.android.support', module: 'appcompat-v7'}],
     [configuration: "compile", dependency: libs.logback],

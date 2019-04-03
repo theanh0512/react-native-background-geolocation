@@ -1,12 +1,10 @@
-package com.marianhello.bgloc.react.service;
+package com.marianhello.bgloc.headless;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.facebook.react.HeadlessJsTaskService;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.HeadlessJsTaskService;
-
 import com.facebook.react.jstasks.HeadlessJsTaskConfig;
 
 import javax.annotation.Nullable;
