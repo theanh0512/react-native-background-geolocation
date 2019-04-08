@@ -56,6 +56,7 @@ public class BackgroundGeolocationFacade {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION
     };
+    public static String HEADLESS_TASK = "";
 
     private boolean mServiceBroadcastReceiverRegistered = false;
     private boolean mLocationModeChangeReceiverRegistered = false;
@@ -166,7 +167,7 @@ public class BackgroundGeolocationFacade {
 
                     if (mDelegate != null) {
                         mDelegate.onHttpAuthorization();
-                    } 
+                    }
 
                     return;
                 }
@@ -426,7 +427,9 @@ public class BackgroundGeolocationFacade {
     }
 
     public void registerHeadlessTask(final String jsFunction) {
-        logger.info("Registering headless task");
+        logger.info("Registering headless task", jsFunction);
+        logger.info("Registering headless task", jsFunction);
+        BackgroundGeolocationFacade.HEADLESS_TASK = jsFunction;
         mService.registerHeadlessTask(jsFunction);
     }
 
