@@ -28,7 +28,6 @@ import com.marianhello.bgloc.data.LocationDAO;
 import com.marianhello.bgloc.provider.LocationProvider;
 import com.marianhello.bgloc.service.LocationService;
 import com.marianhello.bgloc.service.LocationServiceImpl;
-import com.marianhello.bgloc.service.LocationServiceInfo;
 import com.marianhello.bgloc.service.LocationServiceProxy;
 import com.marianhello.bgloc.service.LocationTransform;
 import com.marianhello.bgloc.sync.AccountHelper;
@@ -335,8 +334,7 @@ public class BackgroundGeolocationFacade {
     }
 
     public synchronized void configure(Config config) throws PluginException {
-        try
-        {
+        try {
             Config newConfig = Config.merge(getStoredConfig(), config);
             persistConfiguration(newConfig);
             logger.debug("Service configured with: {}", newConfig.toString());
@@ -389,7 +387,7 @@ public class BackgroundGeolocationFacade {
 
     /**
      * Force location sync
-     *
+     * <p>
      * Method is ignoring syncThreshold and also user sync settings preference
      * and sync locations to defined syncUrl
      */
@@ -427,7 +425,6 @@ public class BackgroundGeolocationFacade {
     }
 
     public void registerHeadlessTask(final String jsFunction) {
-        logger.info("Registering headless task", jsFunction);
         logger.info("Registering headless task", jsFunction);
         BackgroundGeolocationFacade.HEADLESS_TASK = jsFunction;
         mService.registerHeadlessTask(jsFunction);
@@ -480,7 +477,7 @@ public class BackgroundGeolocationFacade {
     }
 
     public static boolean hasPermissions(Context context, String[] permissions) {
-        for (String perm: permissions) {
+        for (String perm : permissions) {
             if (ContextCompat.checkSelfPermission(context, perm) != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
@@ -491,8 +488,9 @@ public class BackgroundGeolocationFacade {
     /**
      * Sets a transform for each coordinate about to be committed (sent or saved for later sync).
      * You can use this for modifying the coordinates in any way.
-     *
+     * <p>
      * If the transform returns <code>null</code>, it will prevent the location from being committed.
+     *
      * @param transform - the transform listener
      */
     public static void setLocationTransform(LocationTransform transform) {
