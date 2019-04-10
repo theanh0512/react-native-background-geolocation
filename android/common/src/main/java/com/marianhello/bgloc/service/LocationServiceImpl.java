@@ -32,8 +32,8 @@ import android.os.Message;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import com.facebook.react.HeadlessJsTaskService;
 
+import com.facebook.react.HeadlessJsTaskService;
 import com.marianhello.bgloc.Config;
 import com.marianhello.bgloc.ConnectivityListener;
 import com.marianhello.bgloc.NotificationHelper;
@@ -105,7 +105,9 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
 
     public static final int MSG_ON_HTTP_AUTHORIZATION = 107;
 
-    /** notification id */
+    /**
+     * notification id
+     */
     private static int NOTIFICATION_ID = 1;
 
     private ResourceResolver mResolver;
@@ -202,21 +204,21 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
 
         mPostLocationTask = new PostLocationTask(mLocationDAO,
                 new PostLocationTask.PostLocationTaskListener() {
-            @Override
-            public void onRequestedAbortUpdates() {
-                handleRequestedAbortUpdates();
-            }
+                    @Override
+                    public void onRequestedAbortUpdates() {
+                        handleRequestedAbortUpdates();
+                    }
 
-            @Override
-            public void onHttpAuthorizationUpdates() {
-                handleHttpAuthorizationUpdates();
-            }
+                    @Override
+                    public void onHttpAuthorizationUpdates() {
+                        handleHttpAuthorizationUpdates();
+                    }
 
-            @Override
-            public void onSyncRequested() {
-                SyncService.sync(mSyncAccount, mResolver.getAuthority(), false);
-            }
-        }, new ConnectivityListener() {
+                    @Override
+                    public void onSyncRequested() {
+                        SyncService.sync(mSyncAccount, mResolver.getAuthority(), false);
+                    }
+                }, new ConnectivityListener() {
             @Override
             public boolean hasConnectivity() {
                 return isNetworkAvailable();
@@ -294,7 +296,7 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
             processMessage(getMessage(intent));
         }
 
-        if(Intent.FLAG_FROM_BACKGROUND==intent.getFlags()){
+        if (Intent.FLAG_FROM_BACKGROUND == intent.getFlags()) {
             start();
             startForeground();
         }
@@ -493,8 +495,8 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
     }
 
     @Override
-    public synchronized  void startHeadlessTask() {
-        if (mHeadlessFunction != null) {
+    public synchronized void startHeadlessTask() {
+        if (mHeadlessFunction != null || BackgroundGeolocationFacade.) {
             mHeadlessTaskRunner = new HeadlessTaskRunner(this);
             mHeadlessTaskRunner.setFunction(mHeadlessFunction);
         }
@@ -544,13 +546,12 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
         runReactHeadlessService(location);
 
 
-
         postLocation(location);
     }
 
     private void runReactHeadlessService(BackgroundLocation location) {
 
-        if(isAppOnForeground(this)){
+        if (isAppOnForeground(this)) {
             return;
         }
 
@@ -560,7 +561,7 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
         locationBundle.putDouble("latitude", location.getLatitude());
         locationBundle.putDouble("longitude", location.getLongitude());
         locationBundle.putLong("time", location.getTime());
-        locationBundle.putFloat("accuracy",location.getAccuracy());
+        locationBundle.putFloat("accuracy", location.getAccuracy());
 
         Intent serviceIntent = new Intent(this, LocationHeadlessService.class);
         serviceIntent.putExtras(locationBundle);
@@ -604,7 +605,7 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
         bundle.putParcelable("payload", location);
         broadcastMessage(bundle);
 
-        runHeadlessTask(new StationaryTask(location){
+        runHeadlessTask(new StationaryTask(location) {
             @Override
             public void onError(String errorMessage) {
                 logger.error("Stationary task error: {}", errorMessage);
@@ -628,7 +629,7 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
         bundle.putParcelable("payload", activity);
         broadcastMessage(bundle);
 
-        runHeadlessTask(new ActivityTask(activity){
+        runHeadlessTask(new ActivityTask(activity) {
             @Override
             public void onError(String errorMessage) {
                 logger.error("Activity task error: {}", errorMessage);
@@ -773,7 +774,8 @@ public class LocationServiceImpl extends Service implements ProviderDelegate, Lo
         sLocationTransform = transform;
     }
 
-    public static @Nullable LocationTransform getLocationTransform() {
+    public static @Nullable
+    LocationTransform getLocationTransform() {
         return sLocationTransform;
     }
 }
